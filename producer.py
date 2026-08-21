@@ -77,7 +77,10 @@ def main():
     create_topic("wikimedia.recentchange")
     producer = Producer({"bootstrap.servers": "localhost:9092",
                          "acks":"all", #wait for all in-sync replicas
-                         "enable.idempotence": True # optional: ensures exactly-once delivery
+                         "enable.idempotence": True,# optional: ensures exactly-once delivery
+                        "retries": 5,                  # retry up to 5 times
+                        "retry.backoff.ms": 500,       # wait 500ms between retries
+                        "delivery.timeout.ms": 60000   # fail if not delivered in 60s
                          })
     try:
         stream_wikimedia(producer)
