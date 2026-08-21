@@ -2,7 +2,7 @@ from confluent_kafka import Producer
 import json
 import requests
 import sseclient
-from confluent_kafka import AdminClient
+from confluent_kafka.admin import AdminClient, NewTopic
 
 WIKIMEDIA_STREAM_URL = "https://stream.wikimedia.org/v2/stream/recentchange"
 
@@ -19,7 +19,7 @@ def create_topic(topic_name):
     if topic_name in existing_topics:
         print(f"Topic '{topic_name}' already exists.")
         return
-    futures = admin_client.create_topics([{"topic": topic_name, "num_partitions": 3, "replication_factor": 1}])
+    futures = admin_client.create_topics([NewTopic(topic=topic_name, num_partitions=3, replication_factor=1)])
     try:
         futures[topic_name].result()  # Wait for the topic creation to complete
         print(f"Topic '{topic_name}' created successfully.")
