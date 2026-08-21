@@ -2,7 +2,7 @@ from confluent_kafka import Producer
 import json
 import requests
 import sseclient
-from confluent_kafka.admin import AdminClient, NewTopic
+from confluent_kafka.admin import AdminClient, NewTopic ,ConfigResource
 
 WIKIMEDIA_STREAM_URL = "https://stream.wikimedia.org/v2/stream/recentchange"
 
@@ -17,9 +17,22 @@ def create_topic(topic_name):
     admin_client = AdminClient({"bootstrap.servers": "localhost:9092"})
     existing_topics = admin_client.list_topics(timeout=10).topics #wait atmost 10 seconds for kafka to respond
     if topic_name in existing_topics:
-        print(f"Topic '{topic_name}' already exists.")
+        print(f"Topic '{topic_name}' already exists. Updating min.insync.replicas...")
+        resource = ConfigResource(
+            ConfigResource.Type.TOPIC,
+            topic_name,
+            set_config={"min.insync.replicas": "2"}   # enforce durability
+        )
+        futures = admin_client.alter_configs([resource])
+        for res, f in futures.items():
+            try:
+                f.result()
+                print(f"Updated {res.name} with min.insync.replicas=2")
+            except Exception as e:
+                print(f"Failed to update {res.name}: {e}")
         return
-    futures = admin_client.create_topics([NewTopic(topic=topic_name, num_partitions=3, replication_factor=1)])
+    futures = admin_client.create_topics([NewTopic(topic=topic_name, num_partitions=3, replication_factor=1,
+                                                   config={"min.insync.replicas": "2"})]) #set at creation
     try:
         futures[topic_name].result()  # Wait for the topic creation to complete
         print(f"Topic '{topic_name}' created successfully.")
@@ -62,7 +75,10 @@ def stream_wikimedia(producer):
 def main():
     print("Starting Wikimedia stream producer...")
     create_topic("wikimedia.recentchange")
-    producer = Producer({"bootstrap.servers": "localhost:9092"})
+    producer = Producer({"bootstrap.servers": "localhost:9092",
+                         "acks":"all", #wait for all in-sync replicas
+                         "enable.idempotence": True # optional: ensures exactly-once delivery
+                         })
     try:
         stream_wikimedia(producer)
     except KeyboardInterrupt:   
