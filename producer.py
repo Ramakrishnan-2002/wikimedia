@@ -84,7 +84,7 @@ def main():
                         "compression.type": "lz4",                 # efficient compression
                         "linger.ms": 5,                            # wait 5ms to batch
                         "batch.size": 32768,                       # 32 KB batch size
-                        "max.in.flight.requests.per.connection": 1 # preserve ordering with retries
+                        "max.in.flight.requests.per.connection": 5 # preserve ordering with retries
             })
     try:
         stream_wikimedia(producer)
