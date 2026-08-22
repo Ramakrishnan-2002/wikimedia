@@ -76,12 +76,16 @@ def main():
     print("Starting Wikimedia stream producer...")
     create_topic("wikimedia.recentchange")
     producer = Producer({"bootstrap.servers": "localhost:9092",
-                         "acks":"all", #wait for all in-sync replicas
-                         "enable.idempotence": True,# optional: ensures exactly-once delivery
+                        "acks":"all", #wait for all in-sync replicas
+                        "enable.idempotence": True,# optional: ensures exactly-once delivery
                         "retries": 2147483647,        # INT_MAX: Keep retrying until timeout
                         "retry.backoff.ms": 500,       # Wait 500ms between retry attempts
-                        "delivery.timeout.ms": 60000   # Fail if not acknowledged within 60 seconds
-                         })
+                        "delivery.timeout.ms": 60000,   # Fail if not acknowledged within 60 seconds
+                        "compression.type": "lz4",                 # efficient compression
+                        "linger.ms": 5,                            # wait 5ms to batch
+                        "batch.size": 32768,                       # 32 KB batch size
+                        "max.in.flight.requests.per.connection": 1 # preserve ordering with retries
+            })
     try:
         stream_wikimedia(producer)
     except KeyboardInterrupt:   
