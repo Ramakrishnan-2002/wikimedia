@@ -78,9 +78,9 @@ def main():
     producer = Producer({"bootstrap.servers": "localhost:9092",
                          "acks":"all", #wait for all in-sync replicas
                          "enable.idempotence": True,# optional: ensures exactly-once delivery
-                        "retries": 5,                  # retry up to 5 times
-                        "retry.backoff.ms": 500,       # wait 500ms between retries
-                        "delivery.timeout.ms": 60000   # fail if not delivered in 60s
+                        "retries": 2147483647,        # INT_MAX: Keep retrying until timeout
+                        "retry.backoff.ms": 500,       # Wait 500ms between retry attempts
+                        "delivery.timeout.ms": 60000   # Fail if not acknowledged within 60 seconds
                          })
     try:
         stream_wikimedia(producer)
