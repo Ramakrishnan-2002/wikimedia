@@ -68,6 +68,7 @@ services:
       - DISABLE_INSTALL_DEMO_CONFIGS=true
       - DISABLE_PERFORMANCE_ANALYZER_AGENT_CLI=true
       - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - compatibility.override_main_response_version=true
     ulimits:
       memlock:
         soft: -1
