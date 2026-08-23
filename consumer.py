@@ -46,7 +46,7 @@ def create_os_index(index_name :str, client: OpenSearch):
 def insert_to_os(client : OpenSearch, index_name : str, message):
     try:
         doc= json.loads(message.decode("utf-8"))
-        doc_id = str(doc.get("id",None))
+        doc_id = str(doc.get("id",None)) #to make it idempotent so no duplicates are stored in os
         client.index(index=index_name,id=doc_id,body=doc)
         logger.info(f"Indexed document with id={doc_id}")
     except Exception as e:
