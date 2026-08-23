@@ -103,8 +103,8 @@ def main():
         "batch.size": 32768,
         "max.in.flight.requests.per.connection": 5,
         # Buffer Settings Fixed:
-        "queue.buffering.max.kbytes": 65536,  # 64 MB buffer limit (65536 KB)
-        "max.block.ms": 30000,                # Wait up to 30s when buffer is full
+        "queue.buffering.max.kbytes": 65536  # 64 MB buffer limit (65536 KB)
+       # "max.block.ms": 30000,                # Wait up to 30s when buffer is full
     }
 
     producer = Producer(producer_config)
